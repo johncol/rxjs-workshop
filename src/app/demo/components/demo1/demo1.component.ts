@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, fromEvent } from 'rxjs';
 import { activity1, activity2, activity3, activity4, lesson } from './demo1.activities';
 
 @Component({
@@ -57,18 +57,42 @@ export class Demo1Component implements OnDestroy, OnInit {
    * Solution for Activity 1
    */
   solution1() {
+    this.button1.addEventListener('click', event => {
+      this.result1 = {
+        x: event.clientX,
+        y: event.clientY
+      };
+    });
   }
 
   /**
    * Solution for Activity 2
    */
   solution2() {
+    this.button2$ = fromEvent(this.button2, 'click');
+    this.button2$.subscribe({
+      next: (event: MouseEvent) => {
+        // this.activity2sub.unsubscribe();
+        this.result2 = {
+          x: event.clientX,
+          y: event.clientY
+        };
+      }
+    });
   }
 
   /**
    * Solution for Activity 3
    */
   solution3() {
+    this.activity3sub = fromEvent(document, 'click').subscribe({
+      next: (event: MouseEvent) => {
+        this.result3 = {
+          x: event.clientX,
+          y: event.clientY
+        };
+      }
+    });
   }
 
   /**
@@ -79,6 +103,12 @@ export class Demo1Component implements OnDestroy, OnInit {
    * It can be used to unsubscribe the observable to prevent memory leaks.
    */
   ngOnDestroy() {
+    if (this.activity2sub) {
+      this.activity2sub.unsubscribe();
+    }
+    if (this.activity3sub) {
+      this.activity3sub.unsubscribe();
+    }
   }
 
 }

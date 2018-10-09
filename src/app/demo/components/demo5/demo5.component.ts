@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, switchMap, tap, catchError } from 'rxjs/operators';
 import { DataService } from '../../services/data.service';
 import { activity1, activity2, activity3, lesson } from './demo5.activities';
 
@@ -81,7 +81,12 @@ export class Demo5Component implements OnInit {
    *
    */
   solution1() {
-
+    this.input1$.subscribe({
+      next: event => {
+        console.log(event);
+        this.result1.value = this.input1.value;
+      }
+    });
   }
 
   /**
@@ -89,7 +94,18 @@ export class Demo5Component implements OnInit {
    *
    */
   solution2() {
-
+    this.input2$
+      .pipe(
+        tap(() => this.result2.value = this.input2.value),
+        map(() => this.input2.value),
+        debounceTime(this.debounceDelay),
+        distinctUntilChanged()
+      )
+      .subscribe({
+        next: query => {
+          this.result2.query = query;
+        }
+      });
   }
 
 
@@ -98,7 +114,34 @@ export class Demo5Component implements OnInit {
    *
    */
   solution3() {
-
+    const input3piped = this.input3$
+      .pipe(
+        map(() => this.input3.value),
+        debounceTime(this.debounceDelay),
+        distinctUntilChanged(),
+        tap(query => this.result3.query = query),
+        switchMap(query => this.search3(query)),
+        catchError(error => {
+          this.resetWhenError(error);
+          return input3piped;
+        })
+      );
+        
+      input3piped.subscribe({
+        next: result => {
+          this.result3.result = result;
+        },
+        error: error => {
+          this.resetWhenError(error);
+        }
+      });
   }
 
+
+
+  private resetWhenError(error: any) {
+    this.result3.error = error;
+    this.result3.loading = false;
+    this.result3.result = null;
+  }
 }

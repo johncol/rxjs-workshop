@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable, Subject } from 'rxjs';
-import {  } from 'rxjs/operators';
+import { throttleTime, debounceTime, map, tap, skip } from 'rxjs/operators';
 import { lesson, activity1, activity2, activity3, activity4, activity5, activity6 } from './demo2.activities';
 
 @Component({
@@ -101,35 +101,68 @@ export class Demo2Component implements OnInit {
    * Solution for Activity 1
    */
   solution1() {
-
+    this.button1$ = fromEvent(this.button1, 'click');
+    this.button1$.subscribe({
+      next: (event: MouseEvent) => {
+        this.increaseCounter('button1');
+      }
+    });
   }
 
   /**
    * Solution for Activity 2
    */
   solution2() {
-
+    this.button2$ = fromEvent(this.button2, 'click');
+    this.button2$.pipe(
+      throttleTime(this.throttleDelay)
+    ).subscribe({
+      next: (event: MouseEvent) => {
+        this.increaseCounter('button2');
+      }
+    });
   }
 
   /**
    * Solution for Activity 3
    */
   solution3() {
-
+    this.button3$ = fromEvent(this.button3, 'click');
+    this.button3$.pipe(
+      debounceTime(this.debounceDelay)
+    ).subscribe({
+      next: (event: MouseEvent) => {
+        this.increaseCounter('button3');
+      }
+    });
   }
 
   /**
    * Solution for Activity 4
    */
   solution4() {
-
+    this.button4$ = fromEvent(this.button4, 'click');
+    this.button4$.pipe(
+      map(() => this.multiplyAmount),
+    ).subscribe({
+      next: value => {
+        this.increaseCounter('button4', value);
+      }
+    });
   }
 
   /**
    * Solution for Excersice 1
    */
   solution5() {
-
+    this.button5$ = fromEvent(this.button5, 'click');
+    this.button5$.pipe(
+      skip(this.skipAmount),
+    ).subscribe({
+      next: () => {
+        this.increaseCounter('button5');
+      }
+    });
   }
 
   /**
